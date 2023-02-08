@@ -1,0 +1,697 @@
+using System.Drawing;
+using System;
+using System.Windows.Forms;
+using System.Data;
+using System.Drawing.Text;
+using System.ComponentModel;
+
+namespace BIOKNOX
+{
+    public partial class Frm_CTC : Form
+    {
+        Connection cn = new Connection();
+        Starter st = new Starter();
+        Funct fn = new Funct();
+        public Frm_CTC()
+        {
+            InitializeComponent();
+        }
+        private void sender_enter(object sender, EventArgs e)
+        {
+            Control control = sender as Control;
+            control.BackColor = Color.LightGoldenrodYellow;
+            control.ForeColor = Color.Red;
+        }
+        private void sender_leave(object sender, EventArgs e)
+        {
+            Control control = sender as Control;
+            control.BackColor = Color.White;
+            control.ForeColor = Color.Black;
+        }
+
+        private void sender_mouse_enter(object sender, EventArgs e)
+        {
+            Control control = sender as Control;
+            control.ForeColor = Color.Blue;
+        }
+
+        private void sender_mouse_leave(object sender, EventArgs e)
+        {
+            Control control = sender as Control;
+            control.ForeColor = Color.Black;
+        }
+
+        private void txtCTC_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            fn.Key(cmblock, e);
+        }
+
+        private void cmblock_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            fn.Key(dvcomp, e);
+        }
+
+        private void txtsearch_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            fn.Key(dv, e);
+            fn.SPkey(e);
+        }
+
+        private void Frm_CTC_Load(object sender, EventArgs e)
+        {
+            MDIStart parent = (MDIStart)this.MdiParent;
+            parent.mnu_payroll_setup_CTC_Setup.Enabled = false;
+            this.clr();
+            //this.dv_display();
+            dv.Width = this.Width - 18;
+            Panel2.Visible = false;
+        }
+
+        private void Frm_CTC_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult cnfr = MessageBox.Show("Are You Sure To Close The Screen.", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (cnfr == DialogResult.Yes)
+            {
+                MDIStart parent = (MDIStart)this.MdiParent;
+                parent.mnu_payroll_setup_CTC_Setup.Enabled = true;
+                e.Cancel = false;
+            }
+            else
+            {
+                e.Cancel = true;
+            }
+        }
+
+        private void Frm_CTC_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            short keyascii = (short)Microsoft.VisualBasic.Strings.Asc(e.KeyChar);
+            if (keyascii == 27)
+            {
+                this.Close();
+            }
+        }
+
+        private void Frm_CTC_KeyDown(object sender, KeyEventArgs e)
+        {
+            MDIStart parent = (MDIStart)this.MdiParent;
+            if (e.KeyCode == Keys.F11)
+            {
+                e.Handled = true;
+                //if (st.editmode(Starter.usr_sl, parent.mnu_master_employee_department.Name) == 1)
+                //{
+                Starter.comd_ctc_setup = "M";
+                //this.clr();
+                //this.dv_display();
+                txt_search.Focus();
+                //}
+            }
+        }
+
+        private void clr()
+        {
+            txttottal.Text = "0.00";
+            txtCTC.Text = "";
+            txtCTCsl.Text = "";
+            txtCTCcd.Text = "";
+            cmblock.SelectedIndex = 0;
+            if (Starter.comd_ctc_setup == "E")
+            {
+                this.Text = ("CTC Master . . . (ENTRY MODE)");
+            }
+            if (Starter.comd_ctc_setup == "M")
+            {
+
+                this.Text = ("CTC Master . . . (EDIT MODE)");
+            }
+
+            //AVINASH....
+            if (Starter.comd_ctc_setup == "D")
+            {
+                this.Text = ("CTC Master ...(DELETE MODE)");
+            }
+            if (Starter.comd_ctc_setup == "V")
+            {
+                this.Text = ("CTC Master . . .(VIEW MODE)");
+            }
+            //this..componentdisp()
+            // dvcomp.Rows.Count <> 0 Then
+            //comp.Rows(0).Cells(0).Selected = False
+            //comp.Rows(0).Cells(1).Selected = True
+            // If
+            //DataSet dsctc = cn.GetData("SELECT COUNT() AS '' FROM  ctc_mst WHERE ");
+            //if (dsctc.Tables[0].Rows.Count != 0)
+            //{
+            //    chkctcdvc.Visible = true;
+            //}
+            //if (dsctc.Tables[0].Rows.Count != 0)
+            //{
+            //    chkctcdvc.Checked = false;
+            //}
+        }
+
+            private void dv_display()
+            {
+                DataSet ds_view = cn.GetData("SELECT ctc_mst.ctc_id AS 'CTC_ID',ctc_mst.ctc_nm AS 'CTC_Name' ");
+                if (ds_view.Tables[0].Rows.Count !=0 )
+                {
+                    dv.DataSource = ds_view.Tables[0];
+                    dv.Columns[0].Width = 100;
+                    dv.Columns[1].Width = 120;
+                    dv.Columns[2].Width = 150;
+                    dv.Columns[3].Width = 140;
+                    dv.Columns[4].Width = 130;
+                    dv.Columns[5].Width = 120;
+                    dv.Columns[6].Width = 110;
+                    dv.Columns[7].Visible = false;
+                    dv.Columns[8].Visible = false;
+                    dv.Columns[9].Visible = false;
+                    dv.Columns[10].Visible = false;
+                    dv.ColumnHeadersDefaultCellStyle.Font = new Font("Arial Rounded MT Bold", 9.5F);
+
+                }
+                else
+                {
+                ds_view.Tables[0].Rows.Clear();
+                    dv.DataSource = ds_view;
+
+                }
+            }
+        private void cmdexit_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void cmdfresh_Click(object sender, EventArgs e)
+        {
+            this.clr();
+            this.dv_display();
+            if(Starter.comd_ctc_setup == "E")
+            {
+                txtCTC.Focus();
+            }
+            else
+            {
+                dv.Focus();
+            }
+            if(dv.Width ==400)
+            {
+                while(dv.Width < this.Width - 18)
+                {
+                    dv.Width += 2;
+                }
+                Panel2.Visible = false;
+            }
+        }
+
+        private void cmdedit_Click(object sender, EventArgs e)
+        {
+            MDIStart parent = (MDIStart)this.MdiParent;
+            if(dv.RowCount != 0)
+            {
+                if(dv.SelectedRows.Count != 0)
+                {
+                    Starter.comd_ctc_setup= "M";
+                    this.clr();
+                    dv.Focus();
+                    //this.dv_select(int.Parse(dv.SelectedCells[10].Value.ToString()));
+                    if(dv.Width == this.Width - 18)
+                    {
+                        while (dv.Width > 400)
+                        {
+                            dv.Width += -2;
+                        }
+                        Panel2.Visible = true; //panel3
+                    }
+                }
+            }
+        }
+
+        private void cmdadd_Click(object sender, EventArgs e)
+        {
+            MDIStart parent = (MDIStart)this.MdiParent;
+            Starter.comd_ctc_setup = "E";
+            this.clr();
+            if(dv.Width == this.Width - 18)
+            {
+                while(dv.Width > 400)
+                {
+                    dv.Width += -2;
+                }
+                Panel2.Visible = true;
+            }
+            txtCTC.Focus();
+        }
+
+        private void cmdsave_Click(object sender, EventArgs e)
+        {
+            if(Starter.comd_ctc_setup != "V")
+            {
+                if(dv.Width != this.Width - 18)
+                {
+                    if(txtCTC.Text.Trim() == "")  //txtCTCid
+                    {
+                        MessageBox.Show("The CTC Group Name should Not be Blank.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        txtCTC.Focus();
+                        return;
+                    }
+                    if(txttottal.Text.Trim()== "")
+                    {
+                        MessageBox.Show("The Total Percentage Should Not Be Blank.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        txttottal.Focus(); 
+                        return;
+                    }
+                    
+                    this.save_record();
+                    if(Starter.comd_ctc_setup == "E")
+                    {
+                        txtCTC.Focus();
+                    }
+                    else
+                    {
+                        dv.Focus();
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Invalid User Authentication.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            }
+        }
+
+       private void save_record()
+        {
+            //string chk = "";
+
+            if(Starter.comd_ctc_setup == "E")
+            {
+                DialogResult cnfr = MessageBox.Show("Are you sure to save The Record.", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                if(cnfr == DialogResult.Yes)
+                {
+                    DataSet ds1 = cn.GetData("SELECT ctc_nm FROM ctc_setup1 WHERE ctc_nm = " + int.Parse(txtCTC.Text) + "");
+                    if (ds1.Tables[0].Rows.Count != 0)
+                    {
+                        MessageBox.Show("Sorry The CTC Group Name Already Present.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    }
+                    else
+                    {
+                        DataSet ds2 = cn.GetData("SELECT MAX(ctc_setup1.ctc_cd)AS maxcd FROM ctc_setup1");
+                        int CTCmx = 1;
+                        if (!DBNull.Value.Equals(ds2.Tables[0].Rows[0][0]))
+                        {
+                            CTCmx = int.Parse(ds2.Tables[0].Rows[0][0].ToString()) + 1;
+                            txtCTCsl.Text = CTCmx.ToString();
+                        }
+                        //INSERT INTO CTC_SETUP1
+                        cn.start();
+                        cn.Execute("INSERT INTO ctc_setup1(ctc_cd, ctc_nm, rec_lock, usr_ent, usr_dt) VALUES(" + int.Parse(txtCTCcd.Text) + 
+                        ", '" + txtCTC.Text.Trim() + "', 'N', '" + Starter.usr_sl + "', GETDATE() ");
+                        cn.close();
+
+                        //INSERT INTO CTC_SETUP2
+                        //cn.Execute("INSERT INTO ctc_setup2(ctc_cd, ctc_sl, allowance_cd, ctc_per) VALUES(" + int.Parse(txtCTCcd.Text) + ", " +
+                        //       int.Parse(txtCTCsl.Text) + ", " + int.Parse(dvcomp.Rows[i].Cells[2][].Tostring()) + ",'" + int.Parse(dvcomp.Rows(I).Cells(1).Value) & "')"
+                        //       cn.close(); NEEDS TO BE RECTIFY VIA SIR......
+                        MessageBox.Show("Record Added Successfully . . .", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    this.clr();
+                    this.dv_display();
+                    txtCTC.Focus();
+                }
+            }
+            
+
+            //fOR Modification Section
+            if (Starter.comd_ctc_setup == "M")
+            {
+                DialogResult cnfr = MessageBox.Show("Are You Sure To Modify The Record.", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+                if (cnfr == DialogResult.Yes)
+                {
+                    DataSet ds3 = cn.GetData("SELECT ctc_nm FROM ctc_setup1 WHERE ctc_cd = " + int.Parse(txtCTCcd.Text) + "");
+                    if (ds3.Tables[0].Rows.Count != 0)
+                    {
+                        cn.start();
+                        cn.Execute("UPDATE ctc_setup1 SET ctc_nm='" + txtCTC.Text.Trim() + "',rec_lock='" + cmblock.Text.Substring(0, 1) +
+                   "' WHERE ctc_cd=" + int.Parse(txtCTCcd.Text) + "");
+                    cn.Execute("DELETE ctc_setup2 WHERE ctc_cd=" + int.Parse(txtCTCcd.Text) + "");
+                        cn.close();
+
+                        MessageBox.Show("Record Modified Successfully . . .", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+
+                }
+                this.clr();
+                this.dv_display();
+                dv.Focus();
+            }
+            if (Starter.usr_tp == "O")
+            {
+                MessageBox.Show("Invalid User Authentication", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+        }
+        //tO BE cONTINUED....................
+        private void sender_MouseEnter(object sender, EventArgs e)
+        {
+            Control control = sender as Control;
+            control.ForeColor = Color.Blue;
+        }
+        private void sender_MouseLeave(object sender, EventArgs e)
+        {
+            Control control = sender as Control;
+            control.ForeColor = Color.Black;
+        }
+        private void sender_Enter(object sender, EventArgs e)
+        {
+            Control control = sender as Control;
+            control.BackColor = Color.LightGoldenrodYellow;
+            control.ForeColor = Color.Red;
+        }
+
+        private void sender_Leave(object sender, EventArgs e)
+        {
+            Control control = sender as Control;
+            control.BackColor = Color.White;
+            control.ForeColor = Color.Black;
+        }
+        private void txt_search_TextChanged(object sender, EventArgs e)
+        {
+            this.dv_display();
+        }
+
+        private void dv_select(int ctcc_sl)
+        {
+            DataSet ds = cn.GetData("SELECT ctc_setup1.*, ISNULL(ctc_setup1.ctc_nm,'') AS 'ctc_nm', ISNULL(ctc_setup2.ctc_cd,'') AS 'ctc_cd' FROM ctc_setup1 LEFT OUTER JOIN ctc_setup2 ON ctc_setup1.ctc_cd = ctc_setup2.ctc_cd LEFT OUTER JOIN shift ON ctc_mst.ctc_sl = shift.ctc_sl WHERE (ctc_mst.ctc_cd = " + ctcc_sl + ")");
+            if (ds.Tables[0].Rows.Count != 0)
+            {
+                txtCTC.Text = ds.Tables[0].Rows[0]["ctc_nm'"].ToString();
+                txtCTCcd.Text = ds.Tables[0].Rows[0]["ctc_cd"].ToString();
+                //txttottal.Text = ds.Tables[0].Rows[0]["usr_ent"].ToString();
+                //txtCTCsl.Text = ds.Tables[0].Rows[0]["dev_nm"].ToString();
+                //txt_IP.Text = ds.Tables[0].Rows[0]["ip_add"].ToString();
+                //txtloc.Text = ds.Tables[0].Rows[0]["dev_loc"].ToString();
+                //cmbcntp.SelectedIndex = int.Parse(ds.Tables[0].Rows[0]["conn_tp"].ToString()) - 1;
+                //if (ds.Tables[0].Rows[0]["down_tp"].ToString() == "1")
+                //{
+                //    cmbdown.SelectedIndex = 0;
+                //}
+                //if (ds.Tables[0].Rows[0]["access_control"].ToString() == "N")
+                //{
+                //    cmbaccesscontrol.SelectedIndex = 0;
+                //}
+                //else
+                //{
+                //    cmbaccesscontrol.SelectedIndex = 1;
+                //}
+                if (ds.Tables[0].Rows[0]["rec_lock"].ToString() == "N")
+                {
+                    cmblock.SelectedIndex = 0;
+                }
+                else
+                {
+                    cmblock.SelectedIndex = 1;
+                }
+                //if (ds.Tables[0].Rows[0]["in_out"].ToString() == "I")
+                //{
+                //    cmbdevicetp.SelectedIndex = 0;
+                //}
+                //else if (ds.Tables[0].Rows[0]["in_out"].ToString() == "O")
+                //{
+                //    cmbdevicetp.SelectedIndex = 1;
+                //}
+                //else
+                //{
+                //    cmbdevicetp.SelectedIndex = 2;
+                //}
+                //cmbmodel.Text = ds.Tables[0].Rows[0]["model_nm"].ToString();
+                //txtmodelcd.Text = ds.Tables[0].Rows[0]["model_sl"].ToString();
+                //cmbshift.Text = ds.Tables[0].Rows[0]["shift_nm"].ToString();
+                //if (ds.Tables[0].Rows[0]["is_registration"].ToString() == "Y")
+                //{
+                //    chkregdvc.Visible = true;
+                //    chkregdvc.Checked = true;
+                //}
+                //else
+                //{
+                //    cmblock.SelectedIndex = 1;
+                //}
+                DataSet dsctc = cn.GetData("SELECT COUNT(ctc_id) AS 'CTC_ID' FROM ctc_mst WHERE usr_ent = 'Y' AND usr_sl = " + Starter.usr_sl + "");
+                //if (dsreg.Tables[0].Rows.Count != 0)
+                //{
+                //    chkregdvc.Visible = true;
+                //    if (dsreg.Tables[0].Rows.Count != 0)
+                //    {
+                //        chkregdvc.Visible = false;
+                //    }
+                //}
+            }
+            dv.Focus();
+        }
+        private void dv_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            fn.Key(txtCTC, e);
+        }
+        private void dv_Click(object sender, EventArgs e)
+        {
+            this.dv_key_View();
+        }
+        private void dv_KeyDown(object sender, KeyEventArgs e)
+        {
+            this.dv_key_View();
+        }
+
+        private void dv_KeyUp(object sender, KeyEventArgs e)
+        {
+            this.dv_key_View();
+        }
+
+        private void dv_key_View()
+        {
+            if (Starter.comd_device != "E")
+            {
+                if (dv.Rows.Count != 0)
+                {
+                    if (dv.SelectedRows.Count != 0)
+                    {
+                        this.dv_select(int.Parse(dv.SelectedCells[10].Value.ToString()));//IN DOUBT.................//..........
+                    }
+                }
+            }
+        }
+        private void txtdevid_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            fn.Key(txtCTC, e);
+            fn.SPkey(e);
+            fn.NUMkey(e);
+        }
+        private void txtctcnm_KeyPress(object sender, KeyPressEventArgs e)  //txtCTC_keyPress
+        {
+            fn.Key(txtCTCsl, e);
+            fn.SPkey(e);
+        }
+        private void cmbmodel_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            fn.Key(cmblock, e);                                               //txt_IP
+            fn.SPkey(e);
+        }
+        private void cmbaccesscontrol_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            fn.Key(txttottal, e);
+            fn.SPkey(e);
+        }
+        //private void txtloc_KeyPress(object sender, KeyPressEventArgs e)
+        //{
+        //    if (cmbshift.Enabled == false)
+        //    {
+        //        fn.Key(cmbdevicetp, e);
+        //        fn.SPkey(e);
+        //    }
+        //    else
+        //    {
+        //        fn.Key(cmbshift, e);
+        //        fn.SPkey(e);
+        //    }
+
+        //}
+        //private void cmbshift_KeyPress(object sender, KeyPressEventArgs e)
+        //{
+        //    //if(cmbdevicetp.Enabled == false)
+        //    //{
+        //    fn.Key(cmblock, e);
+        //    fn.SPkey(e);
+        //    //}
+        //}
+        private void cmbdevicetp_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            fn.Key(cmblock, e);
+            fn.SPkey(e);
+        }
+        private void cmblockk_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            fn.Key(cmdsave, e);
+            fn.SPkey(e);
+        }
+        //private void cmbmodel_GotFocus(object sender, EventArgs e)
+        //{
+        //    cmbmodel.Height = 100;
+        //    fn.populate(cmbmodel, txtmodelcd, "SELECT model_nm FROM dvmodel ORDER BY model_nm");
+        //}
+
+        //private void cmbmodel_LostFocus(object sender, EventArgs e)
+        //{
+        //    cmbmodel.Height = 21;
+        //}
+        //private void cmbshift_GotFocus(object sender, EventArgs e)
+        //{
+        //    cmbshift.Height = 100;
+        //    fn.populate(cmbshift, txtshiftcd, "SELECT shift_nm FROM shift ORDER BY shift_nm");
+        //}
+
+        //private void cmbshift_LostFocus(object sender, EventArgs e)
+        //{
+        //    cmbshift.Height = 21;
+        //}
+        //private void cmbmodel_Validated(object sender, EventArgs e)
+        //{
+        //    fn.validated(txtmodelcd, "SELECT model_sl FROM dvmodel WHERE model_nm = '" + cmbmodel.Text.Trim() + "'");
+        //}
+        //private void cmbmodel_Validating(object sender, CancelEventArgs e)
+        //{
+        //    fn.validating(cmbmodel, "SELECT model_nm FROM dvmodel WHERE model_nm = '" + cmbmodel.Text.Trim() + "'", "Please Select A Valid Model Name.");
+        //}
+        //private void cmbshift_Validated(object sender, EventArgs e)
+        //{
+        //    fn.validated(txtshiftcd, "SELECT shift_sl FROM shift WHERE shift_nm = '" + cmbshift.Text.Trim() + "'");
+        //}
+        //private void cmbshift_Validating(object sender, CancelEventArgs e)
+        //{
+        //    fn.validating(cmbshift, "SELECT shift_nm FROM shift WHERE shift_nm = '" + cmbshift.Text.Trim() + "'", "Please Select A Valid Shift Name.");
+        //}
+        private void txtdevnm_Validating(object sender, CancelEventArgs e)
+        {
+            if (Starter.comd_ctc_setup == "M")
+            {
+                if (txtCTC.Text.Trim() != "")
+                {
+                    DataSet ds1 = cn.GetData("SELECT * FROM ctc_mst WHERE ctc_nm = " + txtCTC.Text.Trim() + "");
+                    if (ds1.Tables[0].Rows.Count != 0)
+                    {
+                        if (ds1.Tables[0].Rows[0]["ctc_nm"].ToString() == txtCTC.Text.Trim())
+                        {
+                            e.Cancel = false;
+                        }
+                        else
+                        {
+                            DataSet ds2 = cn.GetData("SELECT ctc_nm FROM ctc_mst WHERE ctc_nm = '" + txtCTC.Text.Trim() + "'");
+                            if (ds2.Tables[0].Rows.Count != 0)
+                            {
+                                txtCTC.Focus();
+                                e.Cancel = true;
+                                MessageBox.Show("The CTC Group Name is Already Present.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                txtCTC.Text = "";
+                            }
+                            else
+                            {
+                                e.Cancel = false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        txtCTC.Focus();
+                        e.Cancel = true;
+                        MessageBox.Show("Please Select A Valid CTC Group Name.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        txtCTC.Text = "";
+                    }
+                }
+            }
+            else
+
+                if (txtCTC.Text.Trim() != "")
+            {
+                DataSet ds3 = cn.GetData("SELECT ctc_nm FROM ctc_mst WHERE ctc_nm = '" + txtCTC.Text.Trim() + "'");
+                if (ds3.Tables[0].Rows.Count != 0)
+                {
+                    txtCTC.Focus();
+                    e.Cancel = true;
+                    MessageBox.Show("Sorry The Device Name Is Already Present.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    txtCTC.Text = "";
+                }
+                else
+                {
+                    e.Cancel = false;
+                }
+            }
+            else
+            {
+                e.Cancel = false;
+            }
+
+        }
+        //private void txtdevid_Validating(object sender, CancelEventArgs e)
+        //{
+        //    if (Starter.comd_ctc_setup == "M")
+        //    {
+        //        if (ctc_id.Text.Trim() != "" && int.Parse(txtdevicesl.Text) != 0)
+        //        {
+        //            DataSet ds1 = cn.GetData("SELECT dev_id FROM device_mst WHERE device_no = " + int.Parse(txtdevicesl.Text) + "");
+        //            if (ds1.Tables[0].Rows.Count != 0)
+        //            {
+        //                if (ds1.Tables[0].Rows[0]["dev_id"].ToString() == txtdevid.Text.Trim())
+        //                {
+        //                    e.Cancel = false;
+        //                }
+        //                else
+        //                {
+        //                    DataSet ds2 = cn.GetData("SELECT dev_id FROM device_mst WHERE dev_id = '" + txtdevid.Text.Trim() + "'");
+        //                    if (ds2.Tables[0].Rows.Count != 0)
+        //                    {
+        //                        txtdevid.Focus();
+        //                        e.Cancel = true;
+        //                        MessageBox.Show("The Device ID is Already Present.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //                        txtdevid.Text = "";
+        //                    }
+        //                    else
+        //                    {
+        //                        e.Cancel = false;
+        //                    }
+        //                }
+        //            }
+        //            else
+        //            {
+        //                txtdevid.Focus();
+        //                e.Cancel = true;
+        //                MessageBox.Show("Please Select A Valid Device ID.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //                txtdevid.Text = "";
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if (txtdevid.Text.Trim() != "")
+        //        {
+        //            DataSet ds3 = cn.GetData("SELECT dev_id FROM device_mst WHERE dev_id = '" + txtdevid.Text.Trim() + "'");
+        //            if (ds3.Tables[0].Rows.Count != 0)
+        //            {
+        //                txtdevid.Focus();
+        //                e.Cancel = true;
+        //                MessageBox.Show("Sorry The Device ID Is Already Present.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //                txtdevid.Text = "";
+        //            }
+        //            else
+        //            {
+        //                e.Cancel = false;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            e.Cancel = false;
+        //        }
+        //    }
+        //}
+
+
+    }
+}
+
